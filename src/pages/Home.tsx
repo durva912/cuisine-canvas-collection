@@ -19,6 +19,7 @@ import {
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [favorites, setFavorites] = useState<number[]>([]);
 
   const dietFilters = [
     "Vegetarian", "Non-Vegetarian", "Vegan", "Keto", 
@@ -87,6 +88,14 @@ const Home = () => {
       prev.includes(filter) 
         ? prev.filter(f => f !== filter)
         : [...prev, filter]
+    );
+  };
+
+  const toggleFavorite = (recipeId: number) => {
+    setFavorites(prev => 
+      prev.includes(recipeId) 
+        ? prev.filter(id => id !== recipeId)
+        : [...prev, recipeId]
     );
   };
 
@@ -181,9 +190,16 @@ const Home = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="absolute top-2 right-2 bg-white/80 hover:bg-white"
+                  onClick={() => toggleFavorite(recipe.id)}
+                  className={`absolute top-2 right-2 transition-colors ${
+                    favorites.includes(recipe.id) 
+                      ? "bg-destructive/10 hover:bg-destructive/20 text-destructive" 
+                      : "bg-white/80 hover:bg-white"
+                  }`}
                 >
-                  <Heart className="h-4 w-4" />
+                  <Heart 
+                    className={`h-4 w-4 ${favorites.includes(recipe.id) ? 'fill-destructive' : ''}`} 
+                  />
                 </Button>
               </div>
               
