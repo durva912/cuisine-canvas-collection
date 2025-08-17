@@ -106,7 +106,7 @@ const AboutUs = () => {
             Join our community of food lovers and discover your next favorite recipe today.
           </p>
           <Link to="/signup">
-            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-primary">
+            <Button size="lg" variant="outline" className="text-primary border-white hover:bg-white hover:text-primary">
               Join CuisineCanvas
             </Button>
           </Link>
