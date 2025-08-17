@@ -12,7 +12,7 @@ const Index = () => {
       <header className="absolute top-0 left-0 right-0 z-10 flex justify-between items-center p-6">
         <div className="flex items-center space-x-2">
           <ChefHat className="h-8 w-8 text-primary" />
-          <span className="text-2xl font-bold text-foreground">CuisineCanvas</span>
+          <span className="text-2xl font-bold text-white">CuisineCanvas</span>
         </div>
         <nav className="flex space-x-4">
           <Link to="/about">
@@ -49,7 +49,7 @@ const Index = () => {
               </Button>
             </Link>
             <Link to="/about">
-              <Button variant="outline" size="lg" className="text-white border-white hover:bg-white hover:text-foreground text-lg px-8 py-4">
+              <Button variant="outline" size="lg" className="text-black border-white hover:bg-white hover:text-black text-lg px-8 py-4">
                 Learn More
               </Button>
             </Link>
