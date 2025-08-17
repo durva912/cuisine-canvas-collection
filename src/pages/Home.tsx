@@ -15,6 +15,12 @@ import {
   Clock,
   Users
 } from "lucide-react";
+import pastaCarbonaraImg from "@/assets/pasta-carbonara.jpg";
+import quinoaBuddhaImg from "@/assets/quinoa-buddha-bowl.jpg";
+import grilledChickenImg from "@/assets/grilled-chicken-salad.jpg";
+import vegetableStirFryImg from "@/assets/vegetable-stir-fry.jpg";
+import chocolateMousseImg from "@/assets/chocolate-avocado-mousse.jpg";
+import herbSalmonImg from "@/assets/herb-crusted-salmon.jpg";
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,7 +36,7 @@ const Home = () => {
     {
       id: 1,
       title: "Creamy Pasta Carbonara",
-      image: "/api/placeholder/300/200",
+      image: pastaCarbonaraImg,
       time: "25 min",
       servings: 4,
       tags: ["Non-Vegetarian", "Dairy-Free"],
@@ -39,7 +45,7 @@ const Home = () => {
     {
       id: 2,
       title: "Quinoa Buddha Bowl",
-      image: "/api/placeholder/300/200",
+      image: quinoaBuddhaImg,
       time: "15 min",
       servings: 2,
       tags: ["Vegan", "Gluten-Free"],
@@ -48,7 +54,7 @@ const Home = () => {
     {
       id: 3,
       title: "Grilled Chicken Salad",
-      image: "/api/placeholder/300/200",
+      image: grilledChickenImg,
       time: "30 min",
       servings: 3,
       tags: ["Non-Vegetarian", "Keto"],
@@ -57,7 +63,7 @@ const Home = () => {
     {
       id: 4,
       title: "Vegetable Stir Fry",
-      image: "/api/placeholder/300/200",
+      image: vegetableStirFryImg,
       time: "20 min",
       servings: 2,
       tags: ["Vegetarian", "Vegan"],
@@ -66,7 +72,7 @@ const Home = () => {
     {
       id: 5,
       title: "Chocolate Avocado Mousse",
-      image: "/api/placeholder/300/200",
+      image: chocolateMousseImg,
       time: "10 min",
       servings: 4,
       tags: ["Vegan", "Dairy-Free"],
@@ -75,7 +81,7 @@ const Home = () => {
     {
       id: 6,
       title: "Herb-Crusted Salmon",
-      image: "/api/placeholder/300/200",
+      image: herbSalmonImg,
       time: "35 min",
       servings: 2,
       tags: ["Non-Vegetarian", "Keto"],
