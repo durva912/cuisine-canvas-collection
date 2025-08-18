@@ -241,6 +241,74 @@ const RecipeDetail = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Reviews Section */}
+        <Card className="shadow-sm mt-8">
+          <CardHeader>
+            <CardTitle className="text-xl">Reviews ({recipe.totalReviews})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Add Review Form */}
+            <form onSubmit={handleReviewSubmit} className="mb-8 p-4 bg-muted/30 rounded-lg">
+              <h4 className="font-medium mb-3">Add Your Review</h4>
+              
+              <div className="flex items-center mb-3">
+                <span className="text-sm mr-3">Rating:</span>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    className={`text-2xl ${
+                      star <= rating ? "text-warning" : "text-muted-foreground"
+                    }`}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+              
+              <Textarea
+                placeholder="Share your experience with this recipe..."
+                value={newReview}
+                onChange={(e) => setNewReview(e.target.value)}
+                rows={3}
+                className="mb-3"
+              />
+              
+              <Button type="submit" size="sm">
+                Submit Review
+              </Button>
+            </form>
+
+            {/* Existing Reviews */}
+            <div className="space-y-4">
+              {recipe.reviews.map((review) => (
+                <div key={review.id} className="border-b pb-4 last:border-b-0">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <span className="font-medium">{review.user}</span>
+                      <div className="flex items-center mt-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span
+                            key={star}
+                            className={`text-sm ${
+                              star <= review.rating ? "text-warning" : "text-muted-foreground"
+                            }`}
+                          >
+                            ★
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <span className="text-sm text-muted-foreground">{review.date}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{review.comment}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
