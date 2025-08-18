@@ -125,201 +125,122 @@ const RecipeDetail = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card shadow-sm">
-        <div className="flex items-center justify-between p-4 max-w-6xl mx-auto">
-          <Link to="/home" className="flex items-center space-x-2 text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-5 w-5" />
-            <span>Back to Recipes</span>
+        <div className="flex items-center p-4 max-w-7xl mx-auto">
+          <Link to="/home" className="flex items-center space-x-3 text-foreground hover:text-primary">
+            <ArrowLeft className="h-6 w-6" />
+            <h1 className="text-2xl font-bold text-primary">{recipe.title}</h1>
           </Link>
-          <div className="flex items-center space-x-2">
-            <ChefHat className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">Recipe Detail</span>
-          </div>
-          <Button
-            variant={isFavorited ? "default" : "outline"}
-            onClick={toggleFavorite}
-            className={isFavorited ? "bg-primary" : ""}
-          >
-            <Heart className={`h-4 w-4 mr-2 ${isFavorited ? "fill-current" : ""}`} />
-            {isFavorited ? "Favorited" : "Favorite"}
-          </Button>
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto p-6">
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Recipe Header */}
-            <Card className="shadow-card">
-              <div className="relative h-64 md:h-80">
-                <img
-                  src={recipe.image}
-                  alt={recipe.title}
-                  className="w-full h-full object-cover rounded-t-lg"
-                />
-              </div>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-2xl md:text-3xl">{recipe.title}</CardTitle>
-                    <p className="text-muted-foreground mt-2">{recipe.description}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between mt-4">
-                  <div className="flex items-center space-x-6 text-sm text-muted-foreground">
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {recipe.cookTime}
-                    </div>
-                    <div className="flex items-center">
-                      <Users className="h-4 w-4 mr-1" />
-                      {recipe.servings} servings
-                    </div>
-                    <div className="flex items-center">
-                      <Star className="h-4 w-4 mr-1 text-warning fill-current" />
-                      {recipe.rating} ({recipe.totalReviews} reviews)
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    {recipe.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-
-            {/* Instructions */}
-            <Card className="shadow-card">
-              <CardHeader>
-                <CardTitle>Instructions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recipe.instructions.map((instruction, index) => (
-                    <div key={index} className="flex gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
-                        {index + 1}
-                      </div>
-                      <p className="text-sm leading-relaxed pt-1">{instruction}</p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Main Recipe Display */}
+        <div className="grid lg:grid-cols-2 gap-8 mb-8 bg-card rounded-lg shadow-sm p-6">
+          {/* Recipe Image */}
+          <div className="relative">
+            <img
+              src={recipe.image}
+              alt={recipe.title}
+              className="w-full h-80 object-cover rounded-lg"
+            />
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Ingredients */}
-            <Card className="shadow-card">
-              <CardHeader>
-                <CardTitle>Ingredients</CardTitle>
-                <Button 
-                  onClick={orderMissingIngredients}
-                  className="bg-accent hover:bg-accent/90"
-                  size="sm"
-                >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Order Missing Items
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {recipe.ingredients.map((ingredient, index) => (
-                    <div key={index} className="flex items-center space-x-3">
-                      <Checkbox
-                        id={`ingredient-${index}`}
-                        checked={checkedIngredients[index] || false}
-                        onCheckedChange={(checked) => handleIngredientCheck(index, checked as boolean)}
-                      />
-                      <label
-                        htmlFor={`ingredient-${index}`}
-                        className={`text-sm cursor-pointer ${
-                          checkedIngredients[index] ? "line-through text-muted-foreground" : ""
-                        }`}
-                      >
-                        {ingredient}
-                      </label>
-                    </div>
-                  ))}
+          {/* Recipe Info */}
+          <div className="space-y-4">
+            <p className="text-muted-foreground text-lg leading-relaxed">{recipe.description}</p>
+            
+            <div className="flex flex-wrap gap-2">
+              {recipe.tags.map((tag) => (
+                <Badge key={tag} variant={tag === "Non-Veg" ? "destructive" : tag === "Easy" ? "secondary" : "outline"}>
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-2 gap-6 pt-4">
+              <div className="flex items-center space-x-2">
+                <Clock className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <div className="text-sm text-muted-foreground">Total Time</div>
+                  <div className="font-medium">{recipe.cookTime}</div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Users className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <div className="text-sm text-muted-foreground">Servings</div>
+                  <div className="font-medium">{recipe.servings}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-1 pt-2">
+              <Star className="h-5 w-5 text-warning fill-current" />
+              <span className="font-medium text-lg">{recipe.rating}</span>
+              <span className="text-muted-foreground">rating</span>
+            </div>
           </div>
         </div>
 
-        {/* Reviews Section */}
-        <Card className="shadow-card mt-8">
-          <CardHeader>
-            <CardTitle>Reviews ({recipe.totalReviews})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* Add Review Form */}
-            <form onSubmit={handleReviewSubmit} className="mb-8 p-4 bg-secondary/30 rounded-lg">
-              <h4 className="font-medium mb-3">Add Your Review</h4>
-              
-              <div className="flex items-center mb-3">
-                <span className="text-sm mr-3">Rating:</span>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setRating(star)}
-                    className={`text-2xl ${
-                      star <= rating ? "text-warning" : "text-muted-foreground"
-                    }`}
-                  >
-                    ★
-                  </button>
+        {/* Ingredients and Instructions */}
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Ingredients */}
+          <Card className="shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-xl">Ingredients</CardTitle>
+              <Button 
+                onClick={orderMissingIngredients}
+                className="bg-accent hover:bg-accent/90 text-accent-foreground"
+                size="sm"
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Order Missing
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {recipe.ingredients.map((ingredient, index) => (
+                  <div key={index} className="flex items-start space-x-3">
+                    <Checkbox
+                      id={`ingredient-${index}`}
+                      checked={checkedIngredients[index] || false}
+                      onCheckedChange={(checked) => handleIngredientCheck(index, checked as boolean)}
+                      className="mt-0.5"
+                    />
+                    <label
+                      htmlFor={`ingredient-${index}`}
+                      className={`text-sm cursor-pointer leading-relaxed ${
+                        checkedIngredients[index] ? "line-through text-muted-foreground" : ""
+                      }`}
+                    >
+                      {ingredient}
+                    </label>
+                  </div>
                 ))}
               </div>
-              
-              <Textarea
-                placeholder="Share your experience with this recipe..."
-                value={newReview}
-                onChange={(e) => setNewReview(e.target.value)}
-                rows={3}
-                className="mb-3"
-              />
-              
-              <Button type="submit" size="sm">
-                Submit Review
-              </Button>
-            </form>
+            </CardContent>
+          </Card>
 
-            {/* Existing Reviews */}
-            <div className="space-y-4">
-              {recipe.reviews.map((review) => (
-                <div key={review.id} className="border-b pb-4 last:border-b-0">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <span className="font-medium">{review.user}</span>
-                      <div className="flex items-center mt-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <span
-                            key={star}
-                            className={`text-sm ${
-                              star <= review.rating ? "text-warning" : "text-muted-foreground"
-                            }`}
-                          >
-                            ★
-                          </span>
-                        ))}
-                      </div>
+          {/* Instructions */}
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-xl">Instructions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recipe.instructions.map((instruction, index) => (
+                  <div key={index} className="flex gap-4">
+                    <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
+                      {index + 1}
                     </div>
-                    <span className="text-sm text-muted-foreground">{review.date}</span>
+                    <p className="text-sm leading-relaxed">{instruction}</p>
                   </div>
-                  <p className="text-sm text-muted-foreground">{review.comment}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
