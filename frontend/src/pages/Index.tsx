@@ -15,8 +15,10 @@ const Index = () => {
           <span className="text-2xl font-bold text-white">CuisineCanvas</span>
         </div>
         <nav className="flex space-x-4">
-          <Link to="/about">
-            <Button variant="ghost" size="sm">About Us</Button>
+          <Link to="/login">
+            <Button size="sm" className="bg-gradient-hero hover:shadow-warm transition-all duration-300">
+              Sign In
+            </Button>
           </Link>
           <Link to="/signup">
             <Button size="sm" className="bg-gradient-hero hover:shadow-warm transition-all duration-300">

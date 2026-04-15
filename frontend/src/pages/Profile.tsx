@@ -1,41 +1,77 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
 import { ArrowLeft, User, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getStoredAuthUser, saveStoredAuthUser } from "@/lib/api";
 
 const Profile = () => {
   const { toast } = useToast();
-  
+
   const [profileData, setProfileData] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    sex: "male",
-    birthYear: "1990"
+    name: "",
+    email: "",
   });
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
-    setProfileData(prev => ({
+    setProfileData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
+  useEffect(() => {
+    const user = getStoredAuthUser();
+    if (user) {
+      setProfileData({
+        name: user.name,
+        email: user.email,
+      });
+    }
+    setIsLoaded(true);
+  }, []);
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    const trimmedName = profileData.name.trim();
+    const trimmedEmail = profileData.email.trim().toLowerCase();
+    if (!trimmedName || !trimmedEmail) {
+      toast({
+        title: "Missing details",
+        description: "Name and email are required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const existing = getStoredAuthUser();
+    if (!existing) {
+      toast({
+        title: "Not signed in",
+        description: "Please login again to save profile changes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    saveStoredAuthUser({
+      ...existing,
+      name: trimmedName,
+      email: trimmedEmail,
+    });
+
     toast({
       title: "Profile updated!",
       description: "Your profile information has been saved successfully.",
     });
   };
 
-  const currentYear = new Date().getFullYear();
-  const birthYears = Array.from({ length: 80 }, (_, i) => currentYear - i - 16);
+  if (!isLoaded) return null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -92,45 +128,6 @@ const Profile = () => {
                   placeholder="Enter your email"
                   required
                 />
-              </div>
-
-              {/* Sex */}
-              <div className="space-y-2">
-                <Label htmlFor="sex">Sex</Label>
-                <Select 
-                  value={profileData.sex} 
-                  onValueChange={(value) => handleInputChange('sex', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your sex" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                    <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Birth Year */}
-              <div className="space-y-2">
-                <Label htmlFor="birthYear">Birth Year</Label>
-                <Select 
-                  value={profileData.birthYear} 
-                  onValueChange={(value) => handleInputChange('birthYear', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your birth year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {birthYears.map((year) => (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
 
               {/* Save Button */}

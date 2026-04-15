@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,70 +14,35 @@ import {
   Trash2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getFavoriteRecipes, saveFavoriteRecipes, type FavoriteRecipe } from "@/lib/api";
 
 const Favorites = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  
-  const [favoriteRecipes, setFavoriteRecipes] = useState([
-    {
-      id: 1,
-      title: "Creamy Pasta Carbonara",
-      image: "/api/placeholder/300/200",
-      time: "25 min",
-      servings: 4,
-      tags: ["Non-Vegetarian", "Italian"],
-      rating: 4.8
-    },
-    {
-      id: 2,
-      title: "Quinoa Buddha Bowl",
-      image: "/api/placeholder/300/200",
-      time: "15 min",
-      servings: 2,
-      tags: ["Vegan", "Gluten-Free"],
-      rating: 4.6
-    },
-    {
-      id: 3,
-      title: "Chocolate Avocado Mousse",
-      image: "/api/placeholder/300/200",
-      time: "10 min",
-      servings: 4,
-      tags: ["Vegan", "Dairy-Free"],
-      rating: 4.9
-    },
-    {
-      id: 4,
-      title: "Herb-Crusted Salmon",
-      image: "/api/placeholder/300/200",
-      time: "35 min",
-      servings: 2,
-      tags: ["Non-Vegetarian", "Keto"],
-      rating: 4.8
-    },
-    {
-      id: 5,
-      title: "Mediterranean Salad",
-      image: "/api/placeholder/300/200",
-      time: "10 min",
-      servings: 3,
-      tags: ["Vegetarian", "Gluten-Free"],
-      rating: 4.5
-    }
-  ]);
+  const [favoriteRecipes, setFavoriteRecipes] = useState<FavoriteRecipe[]>([]);
 
-  const removeFavorite = (recipeId: number) => {
-    setFavoriteRecipes(prev => prev.filter(recipe => recipe.id !== recipeId));
+  useEffect(() => {
+    setFavoriteRecipes(getFavoriteRecipes());
+  }, []);
+
+  const removeFavorite = (recipeId: string) => {
+    const updated = favoriteRecipes.filter((recipe) => recipe.id !== recipeId);
+    setFavoriteRecipes(updated);
+    saveFavoriteRecipes(updated);
     toast({
       title: "Removed from favorites",
       description: "Recipe has been removed from your favorites list",
     });
   };
 
-  const filteredRecipes = favoriteRecipes.filter(recipe =>
-    recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    recipe.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredRecipes = useMemo(
+    () =>
+      favoriteRecipes.filter(
+        (recipe) =>
+          recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          recipe.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      ),
+    [favoriteRecipes, searchQuery]
   );
 
   return (

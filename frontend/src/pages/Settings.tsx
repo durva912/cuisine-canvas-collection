@@ -12,6 +12,7 @@ import {
   User
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { clearAuth } from "@/lib/api";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -59,14 +60,12 @@ const Settings = () => {
   };
 
   const handleLogout = () => {
+    clearAuth();
     toast({
       title: "Logged out successfully",
-      description: "Redirecting to home page...",
+      description: "Redirecting to sign in...",
     });
-    
-    setTimeout(() => {
-      navigate("/");
-    }, 1500);
+    navigate("/login", { replace: true });
   };
 
   return (

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
 import { ChefHat, ArrowLeft, Mail, Lock, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ApiError, saveAuth, signup } from "@/lib/api";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -14,10 +15,11 @@ const Signup = () => {
     password: "",
     confirmPassword: ""
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
@@ -29,15 +31,35 @@ const Signup = () => {
       return;
     }
 
-    // Simulate successful signup
-    toast({
-      title: "Account created successfully!",
-      description: "Redirecting to login...",
-    });
-    
-    setTimeout(() => {
-      navigate("/login");
-    }, 1500);
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const auth = await signup({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+      saveAuth(auth);
+      toast({
+        title: "Account created successfully!",
+        description: "Redirecting to your dashboard...",
+      });
+      navigate("/home");
+    } catch (err) {
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : "Signup failed";
+      toast({
+        title: "Signup failed",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -140,8 +162,9 @@ const Signup = () => {
                 type="submit" 
                 className="w-full bg-gradient-hero hover:shadow-warm transition-all duration-300"
                 size="lg"
+                disabled={isSubmitting}
               >
-                Create Account
+                {isSubmitting ? "Creating..." : "Create Account"}
               </Button>
             </form>
 

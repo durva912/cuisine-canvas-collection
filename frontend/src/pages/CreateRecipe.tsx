@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link, useNavigate } from "react-router-dom";
 import { ChefHat, ArrowLeft, Plus, X, Upload, Clock, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ApiError, createRecipe, saveRecipeOverride } from "@/lib/api";
 
 const CreateRecipe = () => {
   const [ingredients, setIngredients] = useState<string[]>([""]);
@@ -72,10 +73,23 @@ const CreateRecipe = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const fileToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result ?? ""));
+      reader.onerror = () => reject(new Error("Failed to read image file"));
+      reader.readAsDataURL(file);
+    });
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!recipeData.title || ingredients.filter(i => i.trim()).length === 0 || instructions.filter(i => i.trim()).length === 0) {
+
+    const cleanIngredients = ingredients.map((i) => i.trim()).filter(Boolean);
+    const cleanInstructions = instructions.map((i) => i.trim()).filter(Boolean);
+
+    if (!recipeData.title.trim() || cleanIngredients.length === 0 || cleanInstructions.length === 0) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -84,14 +98,53 @@ const CreateRecipe = () => {
       return;
     }
 
-    toast({
-      title: "Recipe created successfully!",
-      description: "Your recipe has been added to the collection.",
-    });
-    
-    setTimeout(() => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      const imageDataUrl = recipeData.image ? await fileToDataUrl(recipeData.image) : null;
+
+      const createdRecipe = await createRecipe({
+        title: recipeData.title.trim(),
+        description: recipeData.description.trim(),
+        cook_time: recipeData.cookTime.trim(),
+        servings: Number.parseInt(recipeData.servings, 10) || 1,
+        image_url: null,
+        tags: selectedTags,
+        ingredients: cleanIngredients,
+        instructions: cleanInstructions,
+      });
+      saveRecipeOverride(createdRecipe.id, {
+        title: recipeData.title.trim(),
+        description: recipeData.description.trim(),
+        cook_time: recipeData.cookTime.trim(),
+        servings: Number.parseInt(recipeData.servings, 10) || 1,
+        image_url: imageDataUrl,
+        tags: selectedTags,
+        ingredients: cleanIngredients,
+        instructions: cleanInstructions,
+      });
+
+      toast({
+        title: "Recipe created successfully!",
+        description: "Your recipe has been added to the collection.",
+      });
       navigate("/home");
-    }, 1500);
+    } catch (err) {
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : "Failed to create recipe";
+      toast({
+        title: "Create recipe failed",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -303,8 +356,9 @@ const CreateRecipe = () => {
             <Button 
               type="submit" 
               className="bg-gradient-hero hover:shadow-warm transition-all duration-300"
+              disabled={isSubmitting}
             >
-              Create Recipe
+              {isSubmitting ? "Creating..." : "Create Recipe"}
             </Button>
           </div>
         </form>

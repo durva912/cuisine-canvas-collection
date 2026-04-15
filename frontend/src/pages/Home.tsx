@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,11 +21,22 @@ import grilledChickenImg from "@/assets/grilled-chicken-salad.jpg";
 import vegetableStirFryImg from "@/assets/vegetable-stir-fry.jpg";
 import chocolateMousseImg from "@/assets/chocolate-avocado-mousse.jpg";
 import herbSalmonImg from "@/assets/herb-crusted-salmon.jpg";
+import {
+  getFavoriteRecipes,
+  getRecipeOverrides,
+  listRecipes,
+  saveFavoriteRecipes,
+  type FavoriteRecipe,
+  type Recipe as ApiRecipe,
+} from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  const [favorites, setFavorites] = useState<number[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [createdRecipes, setCreatedRecipes] = useState<ApiRecipe[]>([]);
+  const { toast } = useToast();
 
   const dietFilters = [
     "Vegetarian", "Non-Vegetarian", "Vegan", "Keto", 
@@ -89,6 +100,66 @@ const Home = () => {
     }
   ];
 
+  useEffect(() => {
+    setFavorites(getFavoriteRecipes().map((recipe) => recipe.id));
+  }, []);
+
+  useEffect(() => {
+    const loadRecipes = async () => {
+      try {
+        const recipes = await listRecipes();
+        setCreatedRecipes(recipes);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to load recipes";
+        toast({
+          title: "Could not load recipes",
+          description: message,
+          variant: "destructive",
+        });
+      }
+    };
+    void loadRecipes();
+  }, [toast]);
+
+  const createdRecipeCards = useMemo(
+    () => {
+      const overrides = getRecipeOverrides();
+      return createdRecipes.map((recipe) => {
+        const override = overrides[String(recipe.id)] ?? {};
+        const tags = override.tags ?? recipe.tags;
+        return {
+          id: `created-${recipe.id}`,
+          title: override.title ?? recipe.title,
+          image: override.image_url || recipe.image_url || recipeCardsFallbackImage(tags || []),
+          time: override.cook_time ?? recipe.cook_time ?? "N/A",
+          servings: override.servings ?? recipe.servings,
+          tags: tags && tags.length > 0 ? tags : ["Custom"],
+          rating: recipe.rating,
+        };
+      });
+    },
+    [createdRecipes]
+  );
+
+  const allRecipes = useMemo(
+    () => [
+      ...createdRecipeCards,
+      ...sampleRecipes.map((recipe) => ({ ...recipe, id: `sample-${recipe.id}` })),
+    ],
+    [createdRecipeCards, sampleRecipes]
+  );
+
+  const filteredRecipes = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return allRecipes.filter((recipe) => {
+      const matchesSearch = q.length === 0 || recipe.title.toLowerCase().includes(q);
+      const matchesFilters =
+        selectedFilters.length === 0 ||
+        selectedFilters.every((filter) => recipe.tags.includes(filter));
+      return matchesSearch && matchesFilters;
+    });
+  }, [allRecipes, searchQuery, selectedFilters]);
+
   const toggleFilter = (filter: string) => {
     setSelectedFilters(prev => 
       prev.includes(filter) 
@@ -97,12 +168,14 @@ const Home = () => {
     );
   };
 
-  const toggleFavorite = (recipeId: number) => {
-    setFavorites(prev => 
-      prev.includes(recipeId) 
-        ? prev.filter(id => id !== recipeId)
-        : [...prev, recipeId]
-    );
+  const toggleFavorite = (recipe: FavoriteRecipe) => {
+    const existingFavorites = getFavoriteRecipes();
+    const isAlreadyFavorite = existingFavorites.some((item) => item.id === recipe.id);
+    const updatedFavorites = isAlreadyFavorite
+      ? existingFavorites.filter((item) => item.id !== recipe.id)
+      : [recipe, ...existingFavorites];
+    saveFavoriteRecipes(updatedFavorites);
+    setFavorites(updatedFavorites.map((item) => item.id));
   };
 
   return (
@@ -185,7 +258,7 @@ const Home = () => {
 
         {/* Recipe Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sampleRecipes.map((recipe) => (
+          {filteredRecipes.map((recipe) => (
             <Card key={recipe.id} className="overflow-hidden shadow-card hover:shadow-warm transition-all duration-300 group">
               <div className="relative">
                 <img
@@ -196,7 +269,17 @@ const Home = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => toggleFavorite(recipe.id)}
+                  onClick={() =>
+                    toggleFavorite({
+                      id: recipe.id,
+                      title: recipe.title,
+                      image: recipe.image,
+                      time: recipe.time,
+                      servings: recipe.servings,
+                      tags: recipe.tags,
+                      rating: recipe.rating,
+                    })
+                  }
                   className={`absolute top-2 right-2 transition-colors ${
                     favorites.includes(recipe.id) 
                       ? "bg-destructive/10 hover:bg-destructive/20 text-destructive" 
@@ -252,5 +335,12 @@ const Home = () => {
     </div>
   );
 };
+
+function recipeCardsFallbackImage(tags: string[]) {
+  if (tags.includes("Non-Vegetarian")) return grilledChickenImg;
+  if (tags.includes("Vegan")) return quinoaBuddhaImg;
+  if (tags.includes("Vegetarian")) return vegetableStirFryImg;
+  return pastaCarbonaraImg;
+}
 
 export default Home;

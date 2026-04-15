@@ -36,6 +36,34 @@ npm i
 npm run dev
 ```
 
+## Backend (Python + Postgres) - Login/Signup
+
+### Setup Postgres
+
+- Create a database named `cuisine_canvas` in Postgres.
+- Make sure your connection string is set in `backend/.env` as `DATABASE_URL`.
+
+If your Postgres password contains special characters (example `@`), URL-encode it in the connection string.
+
+### Run backend
+
+```sh
+cd backend
+python -m pip install -r requirements.txt
+copy .env.example .env
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+### Run frontend
+
+```sh
+cd frontend
+copy .env.example .env
+npm i
+npm run dev
+```
+
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
